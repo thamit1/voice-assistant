@@ -188,7 +188,9 @@ faster-whisper>=0.9.0   # Speech-to-text
 
 **External Tools (Download separately):**
 - [Ollama](https://ollama.ai/) – LLM inference engine (2.0+ GB)
-- [Piper TTS](https://github.com/rhasspy/piper/releases) – Text-to-speech executable
+- **Piper TTS** – Choose one:
+  - Executable: [Download Windows binary](https://github.com/rhasspy/piper/releases) (~50 MB)
+  - Python package: `pip install piper-tts` (if executables are blocked) (~50 MB)
 - Voice models from [Hugging Face](https://huggingface.co/rhasspy/piper-voices) (60-130 MB each)
 
 **Install Python packages:**
@@ -237,6 +239,20 @@ pip install sounddevice soundfile numpy faster-whisper
 
 ## 🔧 Troubleshooting
 
+**Piper executable blocked on corporate machines?**
+- Many organizations block `.exe` files
+- **Alternative solutions:**
+  1. Install Piper via Python package: `pip install piper-tts` ⭐ **Recommended**
+  2. Build Piper from source with Visual Studio:
+     ```bash
+     git clone https://github.com/rhasspy/piper.git
+     cd piper && mkdir build && cd build
+     cmake .. -G "Visual Studio 17 2022"
+     cmake --build . --config Release
+     ```
+  3. Request security exception from IT admin
+  4. Use pre-built Piper on USB drive from home machine
+
 **No audio input?**
 - Check microphone permissions
 - Test with `audio_test.py`
@@ -255,9 +271,59 @@ pip install sounddevice soundfile numpy faster-whisper
 
 ---
 
-## 📝 License
+## � Offline Deployment & Packaging
 
-MIT License – Feel free to use and modify.
+For air-gapped or corporate environments where downloading is restricted:
+
+### Challenge: Executable Restrictions
+Many organizations block `.exe` files, including `piper.exe`. Solutions:
+
+**Option 1: Use Python Package (Recommended)**
+```bash
+pip install piper-tts
+```
+Update `assistant.py` to use Python instead of subprocess:
+```python
+from piper.voice import PiperVoice
+voice = PiperVoice.load("path/to/model.onnx")
+audio = voice.synthesize("Hello world")
+```
+
+**Option 2: Pre-package without executables**
+- Include only: source code + models
+- Provide setup instructions for Piper via pip
+- Include batch scripts to automate setup
+
+**Option 3: Request IT exception**
+- Get security approval for piper.exe
+- Place in controlled folder like `C:\Program Files\piper`
+
+**Option 4: Portable alternative (no install)**
+- Use pre-built wheels
+- Keep tools in version control as DLLs instead of EXEs
+
+### Recommended Offline Package Contents
+
+**Without executables (~800 MB):**
+```
+voice-assistant-offline/
+├── code/
+│   ├── assistant.py
+│   ├── assistant_faster.py
+│   ├── *.py test files
+│   └── requirements.txt
+├── models/
+│   ├── whisper-tiny.pt (140 MB)
+│   ├── en_US-*.onnx (190 MB)
+│   └── *.onnx.json
+├── setup.bat (downloads Ollama + Piper via pip)
+├── OFFLINE_SETUP.md
+└── README.md
+```
+
+**For offline with Piper (~500 MB more):**
+- Include `piper-tts` wheel instead of exe
+- Users run: `pip install piper-tts-1.x.whl`
 
 ---
 
