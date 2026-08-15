@@ -329,13 +329,15 @@ voice-assistant-offline/
 
 ## 🎯 Roadmap
 
+- [ ] **Wake word detection** – "Amit assistant" to activate (using porcupine or similar)
+- [ ] **Online LLM support** – OpenAI, Claude, Gemini APIs as alternatives to Ollama
 - [ ] Refactor to modular architecture (core/, stt/, llm/, tts/)
 - [ ] Add tool support (open apps, web search, system commands)
 - [ ] Implement assistant memory/context
 - [ ] Web UI dashboard
 - [ ] Docker containerization
 - [ ] Multi-language support
-- [ ] Custom wake word detection
+- [ ] Custom wake word training
 
 ---
 
