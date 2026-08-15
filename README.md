@@ -76,13 +76,33 @@ python assistant.py
 
 Then speak naturally. Say **"stop assistant"** to exit.
 
+### Performance Variants
+
+**For standard systems with decent CPU:**
+```bash
+python assistant.py
+```
+- Uses Whisper "small" model for better accuracy
+- Default Llama 3.2 3B model
+- Recommended for most setups
+
+**For legacy/CPU-only systems:**
+```bash
+python assistant_faster.py
+```
+- Uses Whisper "tiny" model (~5x faster transcription)
+- Optimized for single-threaded CPUs
+- Shorter response times (3-5s instead of 10+s)
+- Less accurate but responsive
+
 ---
 
 ## 📁 Project Structure
 
 ```
 voice-assistant/
-├── assistant.py              # Main voice assistant (listen → transcribe → think → speak)
+├── assistant.py              # Main voice assistant (full features, higher accuracy)
+├── assistant_faster.py       # Optimized version for legacy/CPU-only systems
 ├── audio_test.py             # Audio recording and playback test
 ├── stt_test.py               # Speech-to-text test
 ├── tts_test.py               # Text-to-speech test
@@ -91,6 +111,7 @@ voice-assistant/
 │   ├── en_US-lessac-medium.onnx.json
 │   ├── en_US-libritts-high.onnx
 │   └── en_US-libritts-high.onnx.json
+├── .gitignore
 └── README.md
 ```
 
@@ -143,30 +164,74 @@ Generates speech and plays it back using Piper.
 
 ## ⚙️ Configuration
 
-Edit `assistant.py` to customize:
+Edit `assistant.py` or `assistant_faster.py` to customize:
 
 | Setting | Description |
 |---------|-------------|
 | `PIPER_EXE` | Path to piper.exe executable |
 | `PIPER_MODEL` | Path to ONNX model file |
-| `WHISPER_MODEL` | Whisper model size: "tiny", "base", "small", "medium" |
+| `WHISPER_MODEL` | Whisper model size: "tiny" (fast), "base", "small" (balanced), "medium" (accurate) |
 | `DEVICE` | "cpu" or "cuda" (if GPU available) |
+| `OLLAMA_MODEL` | Model name: "llama3.2:3b", "neural-chat", etc. |
 
 ---
 
 ## 📚 Dependencies
 
+**Python Packages:**
 ```
-sounddevice>=0.4.5
-soundfile>=0.12.1
-numpy>=1.21.0
-faster-whisper>=0.9.0
+sounddevice>=0.4.5      # Audio input/output
+soundfile>=0.12.1       # WAV file handling
+numpy>=1.21.0           # Numerical computing
+faster-whisper>=0.9.0   # Speech-to-text
 ```
 
-Install with:
+**External Tools (Download separately):**
+- [Ollama](https://ollama.ai/) – LLM inference engine (2.0+ GB)
+- [Piper TTS](https://github.com/rhasspy/piper/releases) – Text-to-speech executable
+- Voice models from [Hugging Face](https://huggingface.co/rhasspy/piper-voices) (60-130 MB each)
+
+**Install Python packages:**
 ```bash
-pip install -r requirements.txt
+pip install sounddevice soundfile numpy faster-whisper
 ```
+
+---
+
+## ⚡ Performance Tips
+
+### Response Time Expectations
+
+**Legacy CPU (e.g., Intel i5-4th gen, no GPU):**
+- Recording: 2-4 seconds
+- STT (Whisper tiny): 1-2 seconds
+- LLM (Ollama Llama 3.2 3B): 8-15 seconds
+- TTS (Piper): 1-2 seconds
+- **Total: 12-23 seconds per loop**
+
+**Better CPU / Recent Hardware:**
+- Recording: 2-4 seconds
+- STT (Whisper small): 1-2 seconds
+- LLM (Ollama): 5-10 seconds
+- TTS: 1-2 seconds
+- **Total: 9-18 seconds per loop**
+
+### Optimization Strategies
+
+1. **Use smaller models:**
+   - `WHISPER_MODEL = "tiny"` (fastest)
+   - `--num-predict 30` to limit LLM output length
+
+2. **Reduce recording time:**
+   - `RECORDING_DURATION = 2` instead of 4 seconds
+
+3. **Enable GPU if available:**
+   - NVIDIA: Ollama auto-detects CUDA
+   - AMD: Ollama supports ROCm
+   - Check: `ollama list`
+
+4. **Skip unnecessary components:**
+   - Test individual modules with `*_test.py` files
 
 ---
 
