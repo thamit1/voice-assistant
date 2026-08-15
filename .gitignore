@@ -55,7 +55,6 @@ Thumbs.db
 models/
 *.onnx
 *.onnx.json
-*.wav
 
 # Jupyter Notebook
 .ipynb_checkpoints/
